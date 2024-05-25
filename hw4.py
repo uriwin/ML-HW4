@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 
 
 def pearson_correlation(x, y):
@@ -15,7 +14,6 @@ def pearson_correlation(x, y):
     """
     r = 0.0
     ###########################################################################
-    # TODO: Implement the function.                                           #
     ###########################################################################
     mean_x = np.mean(x)
     mean_y = np.mean(y)
@@ -28,6 +26,7 @@ def pearson_correlation(x, y):
     #                             END OF YOUR CODE                            #
     ###########################################################################
     return r
+
 
 def feature_selection(X, y, n_features=5):
     """
@@ -44,11 +43,20 @@ def feature_selection(X, y, n_features=5):
     ###########################################################################
     # TODO: Implement the function.                                           #
     ###########################################################################
-    pass
+    X_temp = X.select_dtypes(include=['number'])
+    y_numpy = y.to_numpy()
+    features_correlation = {}
+    for column_name, series in X_temp.items():
+        corr = pearson_correlation(series.to_numpy(), y_numpy)
+        features_correlation[column_name] = corr
+
+    best_features = [k for k, v in sorted(features_correlation.items(), key=lambda item: item[1], reverse=True)[:n_features]]
+
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
     return best_features
+
 
 class LogisticRegressionGD(object):
     """
@@ -127,6 +135,7 @@ class LogisticRegressionGD(object):
         ###########################################################################
         return preds
 
+
 def cross_validation(X, y, folds, algo, random_state):
     """
     This function performs cross validation as seen in class.
@@ -165,6 +174,7 @@ def cross_validation(X, y, folds, algo, random_state):
     ###########################################################################
     return cv_accuracy
 
+
 def norm_pdf(data, mu, sigma):
     """
     Calculate normal desnity function for a given data,
@@ -186,6 +196,7 @@ def norm_pdf(data, mu, sigma):
     #                             END OF YOUR CODE                            #
     ###########################################################################
     return p
+
 
 class EM(object):
     """
@@ -274,6 +285,7 @@ class EM(object):
     def get_dist_params(self):
         return self.weights, self.mus, self.sigmas
 
+
 def gmm_pdf(data, weights, mus, sigmas):
     """
     Calculate gmm desnity function for a given data,
@@ -297,6 +309,7 @@ def gmm_pdf(data, weights, mus, sigmas):
     #                             END OF YOUR CODE                            #
     ###########################################################################
     return pdf
+
 
 class NaiveBayesGaussian(object):
     """
@@ -352,6 +365,7 @@ class NaiveBayesGaussian(object):
         ###########################################################################
         return preds
 
+
 def model_evaluation(x_train, y_train, x_test, y_test, k, best_eta, best_eps):
     ''' 
     Read the full description of this function in the notebook.
@@ -375,7 +389,7 @@ def model_evaluation(x_train, y_train, x_test, y_test, k, best_eta, best_eps):
     k : Number of gaussians in each dimension
     best_eta : best eta from cv
     best_eps : best eta from cv
-    ''' 
+    '''
 
     lor_train_acc = None
     lor_test_acc = None
@@ -394,8 +408,8 @@ def model_evaluation(x_train, y_train, x_test, y_test, k, best_eta, best_eps):
             'bayes_train_acc': bayes_train_acc,
             'bayes_test_acc': bayes_test_acc}
 
+
 def generate_datasets():
-    from scipy.stats import multivariate_normal
     '''
     This function should have no input.
     It should generate the two dataset as described in the jupyter notebook,
@@ -412,8 +426,8 @@ def generate_datasets():
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
-    return{'dataset_a_features': dataset_a_features,
-           'dataset_a_labels': dataset_a_labels,
-           'dataset_b_features': dataset_b_features,
-           'dataset_b_labels': dataset_b_labels
-           }
+    return {'dataset_a_features': dataset_a_features,
+            'dataset_a_labels': dataset_a_labels,
+            'dataset_b_features': dataset_b_features,
+            'dataset_b_labels': dataset_b_labels
+            }
