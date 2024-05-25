@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 
-def pearson_correlation( x, y):
+def pearson_correlation(x, y):
     """
     Calculate the Pearson correlation coefficient for two given columns of data.
 
@@ -17,7 +17,13 @@ def pearson_correlation( x, y):
     ###########################################################################
     # TODO: Implement the function.                                           #
     ###########################################################################
-    pass
+    mean_x = np.mean(x)
+    mean_y = np.mean(y)
+    x_minus_mean_x = np.subtract(x, mean_x)
+    y_minus_mean_y = np.subtract(y, mean_y)
+    numerator = np.sum(x_minus_mean_x @ y_minus_mean_y)
+    denominator = np.sqrt(np.sum(np.square(x_minus_mean_x)) * np.sum(np.square(y_minus_mean_y)))
+    r = numerator / denominator
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
