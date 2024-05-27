@@ -138,22 +138,14 @@ class LogisticRegressionGD(object):
     def calculate_cost(self, X, y):
         z = np.dot(X, self.theta)
         h = self.calculate_sigmoid(z)
-        epsilon = 1e-5  # small value to avoid log(0).
-        J = (-1.0 / len(y)) * (np.dot(y.T, np.log(h + epsilon)) + np.dot((1 - y).T, np.log(1 - h + epsilon)))
+        eps=1e-5  # small value to avoid log(0).
+        J = (-1.0 / len(y)) * (np.dot(y.T, np.log(h + eps)) + np.dot((1 - y).T, np.log(1 - h + eps)))
         return J
 
-    def calculate_sigmoid_temp(self, instance):
-        return 1 / (1 + np.exp(-np.dot(instance, self.theta)))
     def calculate_gradient(self, X, y):
         error = self.calculate_sigmoid(np.dot(X, self.theta)) - y
         return np.dot(X.T, error) / len(X)
 
-        # original but to slow
-        # result = np.zeros(len(self.theta))
-        # for instance_index, instance in enumerate(X):
-        #     error = self.calculate_sigmoid_temp(instance) - y[instance_index]
-        #     result += instance * error
-        # return result / len(X)
 
     def predict(self, X):
         """
@@ -162,14 +154,18 @@ class LogisticRegressionGD(object):
         ----------
         X : {array-like}, shape = [n_examples, n_features]
         """
-        preds = None
+        preds = []
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
         X = apply_bias_trick(X)
         z = np.dot(X, self.theta)
         h = self.calculate_sigmoid(z)
-        preds = np.round(h).astype(int)
+        for sigmoid_result in h:
+            if sigmoid_result > 0.5:
+                preds.append(1)
+            else:
+                preds.append(0)
 
         ###########################################################################
         #                             END OF YOUR CODE                            #
