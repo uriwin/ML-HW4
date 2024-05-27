@@ -220,7 +220,24 @@ def cross_validation(X, y, folds, algo, random_state):
     ###########################################################################
     # TODO: Implement the function.                                           #
     ###########################################################################
-    pass
+    complete_set = np.column_stack((X, y))
+    complete_set = np.random.shuffle(complete_set)
+    split_set = np.array_split(complete_set, folds, axis=0)
+    accuracies = []
+    for fold in split_set[:-1]:
+        algo.fit(X[:, :-1], X[:, -1])
+        predictions_for_fold = algo.predict(X[:, :-1])
+        comparation = predictions_for_fold == X[:, -1]
+        successful_predicts = np.sum(comparation)
+        accuracies.append(successful_predicts/fold.shape[0])
+    cv_accuracy = np.average(accuracies)
+
+
+
+
+
+
+
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
