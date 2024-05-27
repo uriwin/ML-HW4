@@ -120,7 +120,6 @@ class LogisticRegressionGD(object):
 
         for i in range(self.n_iter):
             current_gradiant = self.calculate_gradient(X, y)
-            print(current_gradiant)
             self.theta = self.theta - self.eta * current_gradiant
             cost = self.calculate_cost(X, y)
             self.Js.append(cost)
@@ -221,22 +220,18 @@ def cross_validation(X, y, folds, algo, random_state):
     # TODO: Implement the function.                                           #
     ###########################################################################
     complete_set = np.column_stack((X, y))
-    complete_set = np.random.shuffle(complete_set)
+    np.random.shuffle(complete_set)
     split_set = np.array_split(complete_set, folds, axis=0)
     accuracies = []
     for fold in split_set[:-1]:
-        algo.fit(X[:, :-1], X[:, -1])
-        predictions_for_fold = algo.predict(X[:, :-1])
-        comparation = predictions_for_fold == X[:, -1]
-        successful_predicts = np.sum(comparation)
+        fold_data = fold[:, :-1]
+        fold_labels = fold[:, -1]
+        algo.fit(fold_data, fold_labels)
+        predictions_for_fold = algo.predict(fold_data)
+        comparison = predictions_for_fold == fold_labels
+        successful_predicts = np.sum(comparison)
         accuracies.append(successful_predicts/fold.shape[0])
     cv_accuracy = np.average(accuracies)
-
-
-
-
-
-
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
