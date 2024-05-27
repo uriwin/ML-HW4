@@ -302,7 +302,17 @@ class EM(object):
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        pass
+        self.responsibilities = []
+        self.weights = []
+        self.mus = []
+        self.sigmas = []
+        self.costs = []
+        for gaussian in range(self.k):
+            self.weights.append(1/self.k)
+            self.mus.append(0.5)
+            self.sigmas.append(1)
+
+
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
