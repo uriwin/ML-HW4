@@ -125,7 +125,7 @@ class LogisticRegressionGD(object):
             self.Js.append(cost)
             self.thetas.append(self.theta)
             if i > 0:
-                if (self.Js[i - 1] - cost) < self.eps:
+                if abs(self.Js[i - 1] - cost) < self.eps:
                     break
         ###########################################################################
         #                             END OF YOUR CODE                            #
