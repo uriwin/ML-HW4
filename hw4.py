@@ -50,7 +50,8 @@ def feature_selection(X, y, n_features=5):
         corr = pearson_correlation(series.to_numpy(), y_numpy)
         features_correlation[column_name] = corr
 
-    best_features = [k for k, v in sorted(features_correlation.items(), key=lambda item: item[1], reverse=True)[:n_features]]
+    best_features = [k for k, v in
+                     sorted(features_correlation.items(), key=lambda item: item[1], reverse=True)[:n_features]]
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -113,10 +114,46 @@ class LogisticRegressionGD(object):
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        pass
+        X = apply_bias_trick(X)
+
+        self.theta = np.zeros(X.shape[1])
+
+        for i in range(self.n_iter):
+            current_gradiant = self.calculate_gradient(X, y)
+            print(current_gradiant)
+            self.theta = self.theta - self.eta * current_gradiant
+            cost = self.calculate_cost(X, y)
+            self.Js.append(cost)
+            self.thetas.append(self.theta)
+            if i > 0:
+                if (self.Js[i - 1] - cost) < self.eps:
+                    break
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
+
+    def calculate_sigmoid(self, z):
+        return 1 / (1 + np.exp(-z))
+
+    def calculate_cost(self, X, y):
+        z = np.dot(X, self.theta)
+        h = self.calculate_sigmoid(z)
+        epsilon = 1e-5  # small value to avoid log(0).
+        J = (-1.0 / len(y)) * (np.dot(y.T, np.log(h + epsilon)) + np.dot((1 - y).T, np.log(1 - h + epsilon)))
+        return J
+
+    def calculate_sigmoid_temp(self, instance):
+        return 1 / (1 + np.exp(-np.dot(instance, self.theta)))
+    def calculate_gradient(self, X, y):
+        error = self.calculate_sigmoid(np.dot(X, self.theta)) - y
+        return np.dot(X.T, error) / len(X)
+
+        # original but to slow
+        # result = np.zeros(len(self.theta))
+        # for instance_index, instance in enumerate(X):
+        #     error = self.calculate_sigmoid_temp(instance) - y[instance_index]
+        #     result += instance * error
+        # return result / len(X)
 
     def predict(self, X):
         """
@@ -129,11 +166,30 @@ class LogisticRegressionGD(object):
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        pass
+        X = apply_bias_trick(X)
+        z = np.dot(X, self.theta)
+        h = self.calculate_sigmoid(z)
+        preds = np.round(h).astype(int)
+
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
         return preds
+
+
+def apply_bias_trick(X):
+    """
+    Applies the bias trick to the input data.
+
+    Input:
+    - X: Input data (m instances over n features).
+
+    Returns:
+    - X: Input data with an additional column of ones in the
+        zeroth position (m instances over n+1 features).
+    """
+
+    return np.insert(X, 0, 1, axis=1)
 
 
 def cross_validation(X, y, folds, algo, random_state):
