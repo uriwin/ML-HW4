@@ -324,7 +324,15 @@ class EM(object):
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        pass
+        all_pdfs = np.array([])
+        for gaussian_index in range(self.k):
+            pdfs = self.weights[gaussian_index] * norm_pdf(data, self.mus[gaussian_index], self.sigmas[gaussian_index])
+            np.append(all_pdfs, pdfs)
+        denominator = np.sum(all_pdfs)
+        for pdf in all_pdfs:
+            self.responsibilities.append(pdf/denominator)
+
+
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
