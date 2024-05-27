@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 
 
@@ -231,9 +233,8 @@ def cross_validation(X, y, folds, algo, random_state):
         predictions_for_fold = algo.predict(fold_data)
         comparison = predictions_for_fold == fold_labels
         successful_predicts = np.sum(comparison)
-        accuracies.append(successful_predicts/fold.shape[0])
+        accuracies.append(successful_predicts / fold.shape[0])
     cv_accuracy = np.average(accuracies)
-
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -256,7 +257,7 @@ def norm_pdf(data, mu, sigma):
     ###########################################################################
     # TODO: Implement the function.                                           #
     ###########################################################################
-    pass
+    p = (1 / np.sqrt(2 * np.pi * (sigma ** 2))) * np.e ** ((-((data - mu) ** 2)) / (2 * (sigma ** 2)))
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
