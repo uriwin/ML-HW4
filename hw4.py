@@ -223,6 +223,7 @@ def cross_validation(X, y, folds, algo, random_state):
     np.random.shuffle(complete_set)
     split_set = np.array_split(complete_set, folds, axis=0)
     accuracies = []
+    # bla
     for fold in split_set[:-1]:
         fold_data = fold[:, :-1]
         fold_labels = fold[:, -1]
