@@ -139,13 +139,14 @@ class LogisticRegressionGD(object):
     def calculate_cost(self, X, y):
         z = np.dot(X, self.theta)
         h = self.calculate_sigmoid(z)
-        eps = 1e-5  # small value to avoid log(0).
+        eps=1e-5  # small value to avoid log(0).
         J = (-1.0 / len(y)) * (np.dot(y.T, np.log(h + eps)) + np.dot((1 - y).T, np.log(1 - h + eps)))
         return J
 
     def calculate_gradient(self, X, y):
         error = self.calculate_sigmoid(np.dot(X, self.theta)) - y
         return np.dot(X.T, error) / len(X)
+
 
     def predict(self, X):
         """
@@ -371,7 +372,7 @@ class EM(object):
         # TODO: Implement the function.                                           #
         ###########################################################################
         self.init_params(data)
-        # omri one more commit
+
         for iteration in range(self.n_iter):
             self.expectation(data)
             self.maximization(data)
@@ -414,7 +415,7 @@ def gmm_pdf(data, weights, mus, sigmas):
     ###########################################################################
     # TODO: Implement the function.                                           #
     ###########################################################################
-    pass
+    pdf = np.sum(weights * norm_pdf(data.reshape(-1, 1), mus, sigmas), axis=1)
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
