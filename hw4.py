@@ -371,7 +371,7 @@ class EM(object):
         # TODO: Implement the function.                                           #
         ###########################################################################
         self.init_params(data)
-
+        # omri one more commit
         for iteration in range(self.n_iter):
             self.expectation(data)
             self.maximization(data)
