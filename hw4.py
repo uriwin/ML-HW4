@@ -139,14 +139,13 @@ class LogisticRegressionGD(object):
     def calculate_cost(self, X, y):
         z = np.dot(X, self.theta)
         h = self.calculate_sigmoid(z)
-        eps=1e-5  # small value to avoid log(0).
+        eps = 1e-5  # small value to avoid log(0).
         J = (-1.0 / len(y)) * (np.dot(y.T, np.log(h + eps)) + np.dot((1 - y).T, np.log(1 - h + eps)))
         return J
 
     def calculate_gradient(self, X, y):
         error = self.calculate_sigmoid(np.dot(X, self.theta)) - y
         return np.dot(X.T, error) / len(X)
-
 
     def predict(self, X):
         """
@@ -306,15 +305,14 @@ class EM(object):
         ###########################################################################
         self.responsibilities = {}
         self.weights = []
-        self.mus = []
+        indexes = np.random.choice(data.shape[0], self.k, replace=False)
+        self.mus = data[indexes].reshape(self.k)
         self.sigmas = []
         self.costs = []
+
         for gaussian in range(self.k):
-            self.weights.append(1/self.k)
-            self.mus.append(0.5)
+            self.weights.append(1 / self.k)
             self.sigmas.append(1)
-
-
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
@@ -326,14 +324,16 @@ class EM(object):
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        weighted_pdfs = np.array([])
+        weighted_pdfs = np.empty((0, len(data)))
         for gaussian_index in range(self.k):
             pdfs = self.weights[gaussian_index] * norm_pdf(data, self.mus[gaussian_index], self.sigmas[gaussian_index])
-            weighted_pdfs = np.append(weighted_pdfs, pdfs)
-        denominator = np.sum(weighted_pdfs)
+            pdfs = pdfs.reshape(1, -1)
+            weighted_pdfs = np.append(weighted_pdfs, pdfs, axis=0)
+
+        denominator = np.sum(weighted_pdfs, axis=0)
 
         for gaussian_index, gaussian in enumerate(weighted_pdfs):
-            self.responsibilities[gaussian_index] = (gaussian/denominator)
+            self.responsibilities[gaussian_index] = gaussian / denominator
 
         ###########################################################################
         #                             END OF YOUR CODE                            #
@@ -346,7 +346,14 @@ class EM(object):
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        pass
+        for gaussian_index in range(self.k):
+            gaussian_responsibility = self.responsibilities[gaussian_index]
+            self.weights[gaussian_index] = (1 / len(data)) * np.sum(gaussian_responsibility)
+            left_side = (1 / (self.weights[gaussian_index] * len(data)))
+
+            self.mus[gaussian_index] = left_side * np.sum(gaussian_responsibility[:, np.newaxis] * data)
+            self.sigmas[gaussian_index] = np.sqrt(
+                left_side * np.sum(gaussian_responsibility[:, np.newaxis] * np.square(data - self.mus[gaussian_index])))
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
@@ -364,10 +371,26 @@ class EM(object):
         # TODO: Implement the function.                                           #
         ###########################################################################
         self.init_params(data)
-        self.expectation(data)
+
+        for iteration in range(self.n_iter):
+            self.expectation(data)
+            self.maximization(data)
+            current_cost = self.calculate_cost(data)
+            self.costs.append(current_cost)
+            if iteration > 0:
+                if abs(self.costs[iteration - 1] - current_cost) < self.eps:
+                    break
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
+
+    def calculate_cost(self, data):
+        cost = 0
+        for gaussian_index in range(self.k):
+            weighted_pdf = np.log(
+                self.weights[gaussian_index] * norm_pdf(data, self.mus[gaussian_index], self.sigmas[gaussian_index]))
+            cost += weighted_pdf.sum()
+        return -cost
 
     def get_dist_params(self):
         return self.weights, self.mus, self.sigmas
