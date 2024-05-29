@@ -257,7 +257,9 @@ def norm_pdf(data, mu, sigma):
     ###########################################################################
     # TODO: Implement the function.                                           #
     ###########################################################################
-    p = (1 / np.sqrt(2 * np.pi * (sigma ** 2))) * np.e ** ((-((data - mu) ** 2)) / (2 * (sigma ** 2)))
+    # p = (1 / np.sqrt(2 * np.pi * (sigma ** 2))) * math.e ** ((-((data - mu) ** 2)) / (2 * (sigma ** 2)))
+    p = (1 / np.sqrt(2 * np.pi * sigma ** 2)) * np.exp(-((data - mu) ** 2) / (2 * sigma ** 2))
+
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -302,7 +304,7 @@ class EM(object):
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        self.responsibilities = []
+        self.responsibilities = {}
         self.weights = []
         self.mus = []
         self.sigmas = []
@@ -324,14 +326,14 @@ class EM(object):
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        all_pdfs = np.array([])
+        weighted_pdfs = np.array([])
         for gaussian_index in range(self.k):
             pdfs = self.weights[gaussian_index] * norm_pdf(data, self.mus[gaussian_index], self.sigmas[gaussian_index])
-            np.append(all_pdfs, pdfs)
-        denominator = np.sum(all_pdfs)
-        for pdf in all_pdfs:
-            self.responsibilities.append(pdf/denominator)
+            weighted_pdfs = np.append(weighted_pdfs, pdfs)
+        denominator = np.sum(weighted_pdfs)
 
+        for gaussian_index, gaussian in enumerate(weighted_pdfs):
+            self.responsibilities[gaussian_index] = (gaussian/denominator)
 
         ###########################################################################
         #                             END OF YOUR CODE                            #
@@ -361,7 +363,8 @@ class EM(object):
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        pass
+        self.init_params(data)
+        self.expectation(data)
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
