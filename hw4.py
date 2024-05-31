@@ -1,5 +1,3 @@
-import math
-
 import numpy as np
 
 
@@ -548,6 +546,21 @@ def model_evaluation(x_train, y_train, x_test, y_test, k, best_eta, best_eps):
     # TODO: Implement the function.                                           #
     ###########################################################################
     logistic_regression_classifier = LogisticRegressionGD(eta=best_eta, eps=best_eps)
+    logistic_regression_classifier.fit(x_train, y_train)
+    naive_bayes_gaussian_classifier = NaiveBayesGaussian(k=k)
+    naive_bayes_gaussian_classifier.fit(x_train, y_train)
+
+    logistic_regression_predictions = logistic_regression_classifier.predict(x_train)
+    lor_train_acc = np.sum(y_train == logistic_regression_predictions) / len(y_train)
+
+    logistic_regression_predictions = logistic_regression_classifier.predict(x_test)
+    lor_test_acc = np.sum(y_test == logistic_regression_predictions) / len(y_test)
+
+    naive_bayes_gaussian_predictions = naive_bayes_gaussian_classifier.predict(x_train)
+    bayes_train_acc = np.sum(y_train == naive_bayes_gaussian_predictions) / len(y_train)
+
+    naive_bayes_gaussian_predictions = naive_bayes_gaussian_classifier.predict(x_test)
+    bayes_test_acc = np.sum(y_test == naive_bayes_gaussian_predictions) / len(y_test)
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
