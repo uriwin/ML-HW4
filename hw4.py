@@ -139,14 +139,13 @@ class LogisticRegressionGD(object):
     def calculate_cost(self, X, y):
         z = np.dot(X, self.theta)
         h = self.calculate_sigmoid(z)
-        eps=1e-5  # small value to avoid log(0).
+        eps = 1e-5  # small value to avoid log(0).
         J = (-1.0 / len(y)) * (np.dot(y.T, np.log(h + eps)) + np.dot((1 - y).T, np.log(1 - h + eps)))
         return J
 
     def calculate_gradient(self, X, y):
         error = self.calculate_sigmoid(np.dot(X, self.theta)) - y
         return np.dot(X.T, error) / len(X)
-
 
     def predict(self, X):
         """
@@ -225,15 +224,22 @@ def cross_validation(X, y, folds, algo, random_state):
     np.random.shuffle(complete_set)
     split_set = np.array_split(complete_set, folds, axis=0)
     accuracies = []
-    # bla
-    for fold in split_set[:-1]:
-        fold_data = fold[:, :-1]
-        fold_labels = fold[:, -1]
-        algo.fit(fold_data, fold_labels)
-        predictions_for_fold = algo.predict(fold_data)
-        comparison = predictions_for_fold == fold_labels
+
+    for test_data_index, test_data in enumerate(split_set):
+        test_data_without_labels = test_data[:, :-1]
+        test_data_labels = test_data[:, -1]
+
+        train_data = np.concatenate([split_set[i] for i in range(len(split_set)) if i != test_data_index])
+        train_data_without_labels = train_data[:, :-1]
+        train_data_labels = train_data[:, -1]
+
+        algo.fit(train_data_without_labels, train_data_labels)
+
+        predictions_for_train = algo.predict(test_data_without_labels)
+        comparison = predictions_for_train == test_data_labels
         successful_predicts = np.sum(comparison)
-        accuracies.append(successful_predicts / fold.shape[0])
+        accuracies.append(successful_predicts / test_data.shape[0])
+
     cv_accuracy = np.average(accuracies)
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -257,8 +263,7 @@ def norm_pdf(data, mu, sigma):
     ###########################################################################
     # TODO: Implement the function.                                           #
     ###########################################################################
-    # p = (1 / np.sqrt(2 * np.pi * (sigma ** 2))) * math.e ** ((-((data - mu) ** 2)) / (2 * (sigma ** 2)))
-    p = (1 / np.sqrt(2 * np.pi * sigma ** 2)) * np.exp(-((data - mu) ** 2) / (2 * sigma ** 2))
+    p = (1 / np.sqrt(2 * np.pi * np.square(sigma))) * np.exp(-(np.square(data - mu)) / (2 * np.square(sigma)))
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -314,6 +319,7 @@ class EM(object):
         for gaussian in range(self.k):
             self.weights.append(1 / self.k)
             self.sigmas.append(1)
+
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
@@ -438,6 +444,8 @@ class NaiveBayesGaussian(object):
         self.k = k
         self.random_state = random_state
         self.prior = None
+        self.gaussians_details = {}
+        self.classes_prior = {}
 
     def fit(self, X, y):
         """
@@ -454,10 +462,32 @@ class NaiveBayesGaussian(object):
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        pass
+        instances_count = len(X)
+        unique_classes = np.unique(y)
+        em = EM(k=self.k)
+        for unique_class in unique_classes:
+            class_instances = X[y == unique_class]
+            self.gaussians_details[unique_class] = {}
+            for feature_index in range(class_instances.shape[1]):
+                feature_data = class_instances[:, feature_index]
+                em.fit(feature_data.reshape(-1, 1))
+                self.gaussians_details[unique_class][feature_index] = em.get_dist_params()
+
+            self.classes_prior[unique_class] = len(class_instances) / instances_count
+
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
+
+    def calculate_likelihood(self, data, class_label):
+        result = 1.0
+        for feature_index in self.gaussians_details[class_label].keys():
+            weights, mus, sigmas = self.gaussians_details[class_label][feature_index]
+            result *= gmm_pdf(data[feature_index], weights, mus, sigmas)
+        return result
+
+    def calculate_posterior(self, data, class_label):
+        return self.classes_prior[class_label] * self.calculate_likelihood(data, class_label)
 
     def predict(self, X):
         """
@@ -470,7 +500,14 @@ class NaiveBayesGaussian(object):
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        pass
+        preds = []
+        for instance in X:
+            classes_posterior = {}
+            for unique_class in self.gaussians_details.keys():
+                class_posterior = self.calculate_posterior(instance, unique_class)
+                classes_posterior[unique_class] = class_posterior
+            instance_prediction = max(classes_posterior, key=classes_posterior.get)
+            preds.append(instance_prediction)
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
@@ -510,7 +547,8 @@ def model_evaluation(x_train, y_train, x_test, y_test, k, best_eta, best_eps):
     ###########################################################################
     # TODO: Implement the function.                                           #
     ###########################################################################
-    pass
+    logistic_regression_classifier = LogisticRegressionGD(eta=best_eta, eps=best_eps)
+
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
