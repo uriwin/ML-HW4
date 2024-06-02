@@ -1,4 +1,5 @@
 import numpy as np
+from matplotlib import pyplot as plt
 
 
 def pearson_correlation(x, y):
@@ -571,25 +572,91 @@ def model_evaluation(x_train, y_train, x_test, y_test, k, best_eta, best_eps):
             'bayes_test_acc': bayes_test_acc}
 
 
+# Seed for reproducibility
+np.random.seed(42)
+
 def generate_datasets():
     '''
-    This function should have no input.
-    It should generate the two dataset as described in the jupyter notebook,
-    and return them according to the provided return dict.
+    This function generates two datasets:
+    - dataset_a: Where Naive Bayes performs better
+    - dataset_b: Where Logistic Regression performs better
+
+    It also visualizes the datasets with 2D plots for pairwise feature relationships.
     '''
-    dataset_a_features = None
-    dataset_a_labels = None
-    dataset_b_features = None
-    dataset_b_labels = None
-    ###########################################################################
-    # TODO: Implement the function.                                           #
-    ###########################################################################
-    pass
-    ###########################################################################
-    #                             END OF YOUR CODE                            #
-    ###########################################################################
-    return {'dataset_a_features': dataset_a_features,
-            'dataset_a_labels': dataset_a_labels,
-            'dataset_b_features': dataset_b_features,
-            'dataset_b_labels': dataset_b_labels
-            }
+    def generate_dataset_a():
+        n_samples = 500
+
+        # Parameters for class 0
+        mean_0 = [1, 1, 1]
+        cov_0 = np.diag([1, 2, 1.5])
+
+        # Parameters for class 1
+        mean_1 = [4, 4, 4]
+        cov_1 = np.diag([1.5, 1, 2])
+
+        # Generate samples
+        X0 = np.random.multivariate_normal(mean_0, cov_0, n_samples // 2)
+        X1 = np.random.multivariate_normal(mean_1, cov_1, n_samples // 2)
+
+        # Combine samples and labels
+        X = np.vstack((X0, X1))
+        y = np.hstack((np.zeros(n_samples // 2), np.ones(n_samples // 2)))
+
+        return X, y
+
+    def generate_dataset_b():
+        n_samples = 500
+
+        # Parameters for class 0
+        mean_0 = [1, 1, 1]
+        cov_0 = [[1, 0.8, 0.6], [0.8, 1, 0.6], [0.6, 0.6, 1]]
+
+        # Parameters for class 1
+        mean_1 = [4, 4, 4]
+        cov_1 = [[1, 0.8, 0.6], [0.8, 1, 0.6], [0.6, 0.6, 1]]
+
+        # Generate samples
+        X0 = np.random.multivariate_normal(mean_0, cov_0, n_samples // 2)
+        X1 = np.random.multivariate_normal(mean_1, cov_1, n_samples // 2)
+
+        # Combine samples and labels
+        X = np.vstack((X0, X1))
+        y = np.hstack((np.zeros(n_samples // 2), np.ones(n_samples // 2)))
+
+        return X, y
+
+    # Generate the datasets
+    dataset_a_features, dataset_a_labels = generate_dataset_a()
+    dataset_b_features, dataset_b_labels = generate_dataset_b()
+
+    # Function to plot the datasets
+    def plot_datasets(X_a, y_a, X_b, y_b):
+        fig, axs = plt.subplots(3, 2, figsize=(15, 15))
+
+        # Plot dataset_a
+        axs[0, 0].scatter(X_a[:, 0], X_a[:, 1], c=y_a, cmap='bwr', alpha=0.5)
+        axs[0, 0].set_title('**Naive Bayes using EM** - dataset_a: Feature 1 vs Feature 2')
+        axs[1, 0].scatter(X_a[:, 0], X_a[:, 2], c=y_a, cmap='bwr', alpha=0.5)
+        axs[1, 0].set_title('**Naive Bayes using EM** - dataset_a: Feature 1 vs Feature 3')
+        axs[2, 0].scatter(X_a[:, 1], X_a[:, 2], c=y_a, cmap='bwr', alpha=0.5)
+        axs[2, 0].set_title('**Naive Bayes using EM** - dataset_a: Feature 2 vs Feature 3')
+
+        # Plot dataset_b
+        axs[0, 1].scatter(X_b[:, 0], X_b[:, 1], c=y_b, cmap='bwr', alpha=0.5)
+        axs[0, 1].set_title('**Logistic regression** - dataset_b: Feature 1 vs Feature 2')
+        axs[1, 1].scatter(X_b[:, 0], X_b[:, 2], c=y_b, cmap='bwr', alpha=0.5)
+        axs[1, 1].set_title('**Logistic regression** - dataset_b: Feature 1 vs Feature 3')
+        axs[2, 1].scatter(X_b[:, 1], X_b[:, 2], c=y_b, cmap='bwr', alpha=0.5)
+        axs[2, 1].set_title('**Logistic regression** - dataset_b: Feature 2 vs Feature 3')
+
+        plt.show()
+
+    # Plot the datasets
+    plot_datasets(dataset_a_features, dataset_a_labels, dataset_b_features, dataset_b_labels)
+
+    return {
+        'dataset_a_features': dataset_a_features,
+        'dataset_a_labels': dataset_a_labels,
+        'dataset_b_features': dataset_b_features,
+        'dataset_b_labels': dataset_b_labels
+    }
